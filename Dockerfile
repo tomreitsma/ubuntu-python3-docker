@@ -3,9 +3,18 @@
 FROM ubuntu:latest
 MAINTAINER Tom Reitsma "tom@triton-it.nl"
 
-RUN apt-get update \
-  && apt-get install -y python3-pip python3-dev \
-  && ln -s /usr/bin/python3 /usr/local/bin/python \
-  && pip3 install --upgrade pip
+ARG python_version=3.7.3
 
-ENTRYPOINT ["python"]
+RUN apt-get update \
+  && apt-get install -y build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev wget \
+  && cd /usr/src \
+  && wget https://www.python.org/ftp/python/$python_version/Python-$python_version.tar.xz \
+  && tar -xf Python-$python_version.tar.xz \
+  && cd Python-$python_version \
+  && ./configure --enable-optimizations \
+  && make -j`nproc` \
+  && make altinstall \
+  && ln -s /usr/local/bin/python3.7 /usr/bin/python \
+  && python -m pip install --upgrade pip
+
+RUN ["python"]
